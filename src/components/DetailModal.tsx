@@ -36,7 +36,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     const downloadUrl = DirectusService.getAssetDownloadUrl(session.alumni_showcase);
     if (downloadUrl) {
       window.open(downloadUrl, '_blank');
-      
+
       // Show download message
       setShowDownloadMessage(true);
       setTimeout(() => {
@@ -57,7 +57,16 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
         ref={modalRef}
         className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative"
       >
-        <div className="absolute right-4 top-4 flex gap-2">
+        <img
+          src={DirectusService.getAssetUrl(session.alumni_image)}
+          alt={session.alumni_name}
+          loading="lazy"
+          onLoad={handleImageLoad}
+          className={`w-full h-64 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
+        />
+        
+        {/* Button Container */}
+        <div className="absolute right-4 top-4 flex gap-2 z-10">
           <button
             onClick={handleDownloadImage}
             className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
@@ -75,15 +84,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             <X className="w-5 h-5" />
           </button>
         </div>
-        <img
-          src={DirectusService.getAssetUrl(session.alumni_image)}
-          alt={session.alumni_name}
-          loading="lazy"
-          onLoad={handleImageLoad}
-          onError={() => setImageLoaded(false)} // Handle image load error
-          className={`w-full h-64 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
-        />
-        
+
         {/* Temporary download message */}
         {showDownloadMessage && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded-lg shadow-md z-60">
