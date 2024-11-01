@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Linkedin } from 'lucide-react';
 import type { AlumniSession } from '../types';
 import { DirectusService } from '../services/directus';
@@ -9,6 +9,12 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session, onClick }: SessionCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
   return (
     <div 
       onClick={onClick}
@@ -18,7 +24,9 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
         <img
           src={DirectusService.getAssetUrl(session.alumni_showcase)}
           alt={session.alumni_name}
-          className="object-cover w-full h-48"
+          loading="lazy"  // Lazy loading attribute
+          onLoad={handleImageLoad}
+          className={`object-cover w-full h-48 transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
         />
       </div>
       <div className="p-6">

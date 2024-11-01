@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   X,
   Briefcase,
@@ -18,6 +18,7 @@ interface DetailModalProps {
 
 export function DetailModal({ session, onClose }: DetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -32,6 +33,10 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
 
   const handleDownloadImage = () => {
     window.open(DirectusService.getAssetDownloadUrl(session.alumni_showcase), '_blank');
+  };
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
   };
 
   return (
@@ -60,12 +65,13 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           <img
             src={DirectusService.getAssetUrl(session.alumni_image)}
             alt={session.alumni_name}
-            className="w-full h-64 object-cover"
+            loading="lazy"  // Lazy loading attribute
+            onLoad={handleImageLoad}
+            className={`w-full h-64 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
           />
         </div>
 
         <div className="p-6">
-          {/* Adjusted spacing between name and role */}
           <div className="flex justify-between items-start">
             <h2 className="text-2xl font-bold text-gray-900">
               {session.alumni_name}
@@ -80,7 +86,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                 <Linkedin className="w-5 h-5" />
                 LinkedIn Profile
               </a>
-              {/* Conditionally render hike only if previous role is not 'Fresher' */}
               {session.previous_role !== 'Fresher' && (
                 <div className="flex items-center gap-2 text-green-600">
                   <TrendingUp className="w-5 h-5" />
@@ -90,7 +95,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             </div>
           </div>
 
-          <div className="space-y-2 mb-4"> {/* Adjusted `space-y-2` and removed `mb-6` */}
+          <div className="space-y-2 mb-4">
             <div className="flex items-center gap-2 text-gray-600">
               <Briefcase className="w-5 h-5 text-gray-400" />
               <span>
