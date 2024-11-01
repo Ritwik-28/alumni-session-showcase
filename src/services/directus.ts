@@ -1,7 +1,7 @@
 // services/directus.ts
 import type { AlumniSession } from '../types';
 
-const DIRECTUS_BASE_URL = import.meta.env.VITE_DIRECTUS_URL || 'https://directus.crio.do';
+const DIRECTUS_BASE_URL = import.meta.env.VITE_DIRECTUS_URL;
 
 export class DirectusService {
   private static token: string | null = null;
