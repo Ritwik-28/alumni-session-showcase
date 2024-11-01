@@ -17,7 +17,7 @@ export function App() {
   const touchStart = useRef(0);
   const touchEnd = useRef(0);
   const isTouching = useRef(false); // Flag to indicate if the user is touching
-  const swipeTimeout = useRef<number | null>(null); // Changed from NodeJS.Timeout to number
+  const swipeTimeout = useRef<number | null>(null); // Using number | null for browser compatibility
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,7 +68,7 @@ export function App() {
     }
 
     // Check if a swipe or a tap occurred
-    swipeTimeout.current = setTimeout(() => {
+    swipeTimeout.current = window.setTimeout(() => { // Explicitly using window.setTimeout
       if (isTouching.current) {
         // Prevent swipe action if it's a tap
         if (Math.abs(swipeDistance) > minSwipeDistance) {
