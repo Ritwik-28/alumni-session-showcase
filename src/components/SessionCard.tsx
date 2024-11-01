@@ -15,9 +15,32 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
     setImageLoaded(true);
   };
 
+  // Track card opening event
+  const handleCardClick = () => {
+    onClick();
+    trackEvent(`alumni_card_${session.id}_open_modal`, 'open_modal');
+  };
+
+  // Track LinkedIn profile click event
+  const handleLinkedInClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the click from bubbling up to the card
+    trackEvent(`alumni_card_${session.id}_view_linkedin`, 'view_linkedin');
+  };
+
+  // Tracking function using gtag
+  const trackEvent = (eventName: string, action: string) => {
+    if (window.gtag) {
+      window.gtag('event', action, {
+        event_category: 'Alumni Card',
+        event_label: eventName,
+        value: session.id,
+      });
+    }
+  };
+
   return (
     <div 
-      onClick={onClick}
+      onClick={handleCardClick}
       className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer overflow-hidden group"
     >
       <div className="aspect-w-16 aspect-h-9 relative">
@@ -39,9 +62,7 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-700 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent the click from bubbling up to the card
-            }}
+            onClick={handleLinkedInClick} // Updated to track LinkedIn click
             title="View LinkedIn Profile" // Added title for accessibility
           >
             <Linkedin className="w-5 h-5" />

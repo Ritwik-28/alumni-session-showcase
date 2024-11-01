@@ -37,6 +37,9 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     if (downloadUrl) {
       window.open(downloadUrl, '_blank');
 
+      // Track download button click
+      trackEvent(`modal_${session.id}_download_image`, 'download_image');
+
       // Show download message
       setShowDownloadMessage(true);
       setTimeout(() => {
@@ -49,6 +52,30 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
 
   const handleImageLoad = () => {
     setImageLoaded(true);
+  };
+
+  const handleLinkedInClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    trackEvent(`modal_${session.id}_view_linkedin`, 'view_linkedin');
+  };
+
+  const handleScheduleSessionClick = () => {
+    trackEvent(`modal_${session.id}_schedule_session`, 'schedule_session');
+    window.open(
+      'https://docs.google.com/forms/d/e/1FAIpQLSfcFgyYj-Mbh9xyteoSIDmTcFpNtZI-LYIJW6k0rk1hk4AuXA/viewform',
+      '_blank'
+    );
+  };
+
+  // Tracking function using gtag
+  const trackEvent = (eventName: string, action: string) => {
+    if (window.gtag) {
+      window.gtag('event', action, {
+        event_category: 'Modal Interaction',
+        event_label: eventName,
+        value: session.id,
+      });
+    }
   };
 
   return (
@@ -103,6 +130,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
+                onClick={handleLinkedInClick} // Track LinkedIn click
               >
                 <Linkedin className="w-5 h-5" />
                 LinkedIn Profile
@@ -149,12 +177,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           )}
 
           <button
-            onClick={() =>
-              window.open(
-                'https://docs.google.com/forms/d/e/1FAIpQLSfcFgyYj-Mbh9xyteoSIDmTcFpNtZI-LYIJW6k0rk1hk4AuXA/viewform',
-                '_blank'
-              )
-            }
+            onClick={handleScheduleSessionClick} // Track schedule session click
             className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
           >
             Schedule a 1:1 Alumni Session
