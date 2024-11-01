@@ -38,8 +38,8 @@ export function Filters({
     : companies;
 
   return (
-    <div className="flex flex-col items-center gap-4 mb-12 sticky top-0 bg-white z-10 shadow">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">
+    <div className="flex flex-col items-center gap-4 mb-12 sticky top-0 bg-white z-10 shadow rounded-lg p-4">
+      <h1 className="text-4xl font-bold text-gray-900 mb-4">
         Book Alumni Session
       </h1>
       <div className="flex flex-col sm:flex-row gap-4">
