@@ -34,9 +34,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     window.open(DirectusService.getAssetDownloadUrl(session.alumni_showcase), '_blank');
   };
 
-  // Log the URL to ensure it's correct
-  console.log("Alumni Image URL:", DirectusService.getAssetUrl(session.alumni_image));
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div
@@ -68,7 +65,8 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
         </div>
 
         <div className="p-6">
-          <div className="flex justify-between items-start mb-4">
+          {/* Adjusted spacing between name and role */}
+          <div className="flex justify-between items-start">
             <h2 className="text-2xl font-bold text-gray-900">
               {session.alumni_name}
             </h2>
@@ -82,14 +80,17 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                 <Linkedin className="w-5 h-5" />
                 LinkedIn Profile
               </a>
-              <div className="flex items-center gap-2 text-green-600">
-                <TrendingUp className="w-5 h-5" />
-                <span className="font-semibold">{session.hike_number}% Hike</span>
-              </div>
+              {/* Conditionally render hike only if previous role is not 'Fresher' */}
+              {session.previous_role !== 'Fresher' && (
+                <div className="flex items-center gap-2 text-green-600">
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="font-semibold">{session.hike_number}% Hike</span>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="space-y-4 mb-6">
+          <div className="space-y-2 mb-4"> {/* Adjusted `space-y-2` and removed `mb-6` */}
             <div className="flex items-center gap-2 text-gray-600">
               <Briefcase className="w-5 h-5 text-gray-400" />
               <span>
@@ -108,7 +109,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col gap-4 mb-4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-sm text-gray-500 mb-2">Alumni History</p>
               <div 
