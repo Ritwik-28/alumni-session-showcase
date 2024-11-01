@@ -84,7 +84,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
               >
                 <Linkedin className="w-5 h-5" />
-                LinkedIn Profile
               </a>
               {session.hike_number !== null && session.previous_role !== 'Fresher' && (
                 <div className="flex items-center gap-2 text-green-600">
