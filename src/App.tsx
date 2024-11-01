@@ -16,6 +16,7 @@ export function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const touchStart = useRef(0);
   const touchEnd = useRef(0);
+  const isTouching = useRef(false); // Flag to indicate if the user is touching
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +50,7 @@ export function App() {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStart.current = e.targetTouches[0].clientX;
+    isTouching.current = true; // Set the flag to true on touch start
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -59,17 +61,25 @@ export function App() {
     const minSwipeDistance = 50;
     const swipeDistance = touchStart.current - touchEnd.current;
 
-    if (Math.abs(swipeDistance) > minSwipeDistance) {
-      if (swipeDistance > 0) {
-        setCurrentSlide((prev) =>
-          prev === filteredSessions.length - 1 ? 0 : prev + 1
-        );
+    if (isTouching.current) {
+      // Prevent swipe action if it's a tap
+      if (Math.abs(swipeDistance) > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          setCurrentSlide((prev) =>
+            prev === filteredSessions.length - 1 ? 0 : prev + 1
+          );
+        } else {
+          setCurrentSlide((prev) =>
+            prev === 0 ? filteredSessions.length - 1 : prev - 1
+          );
+        }
       } else {
-        setCurrentSlide((prev) =>
-          prev === 0 ? filteredSessions.length - 1 : prev - 1
-        );
+        // Handle tap if it's not a swipe
+        setSelectedSession(filteredSessions[currentSlide]);
       }
     }
+    
+    isTouching.current = false; // Reset the flag on touch end
   };
 
   if (error) {
@@ -133,31 +143,26 @@ export function App() {
                     <div className="w-full max-w-sm mx-auto px-4">
                       <SessionCard
                         session={filteredSessions[currentSlide]}
-                        onClick={() =>
-                          setSelectedSession(filteredSessions[currentSlide])
-                        }
+                        onClick={() => setSelectedSession(filteredSessions[currentSlide])}
                       />
                     </div>
                   </div>
 
-                  {/* Update the number of toggles based on a condition, such as the number of visible items */}
+                  {/* Show exactly 5 toggles */}
                   <div className="flex justify-center gap-2 mt-4">
-                    {filteredSessions.length > 1 && (
+                    {[0, 1, 2, 3, 4].map((index) => (
                       <button
+                        key={index}
                         className={`h-2 rounded-full transition-all ${
-                          currentSlide === 0 ? 'w-4 bg-blue-600' : 'w-2 bg-gray-300'
+                          currentSlide === index ? 'w-4 bg-blue-600' : 'w-2 bg-gray-300'
                         }`}
-                        onClick={() => setCurrentSlide(0)}
+                        onClick={() => {
+                          if (index < filteredSessions.length) {
+                            setCurrentSlide(index);
+                          }
+                        }}
                       />
-                    )}
-                    {filteredSessions.length > 1 && (
-                      <button
-                        className={`h-2 rounded-full transition-all ${
-                          currentSlide === 1 ? 'w-4 bg-blue-600' : 'w-2 bg-gray-300'
-                        }`}
-                        onClick={() => setCurrentSlide(1)}
-                      />
-                    )}
+                    ))}
                   </div>
                 </div>
               )}
