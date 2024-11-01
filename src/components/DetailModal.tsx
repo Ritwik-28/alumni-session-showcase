@@ -23,7 +23,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose();
+        onClose(); // Close modal when clicking outside
       }
     }
 
@@ -55,7 +55,10 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
               <Download className="w-5 h-5" />
             </button>
             <button
-              onClick={onClose}
+              onClick={() => {
+                console.log('Close button clicked'); // Debugging line
+                onClose(); // Ensure onClose is called
+              }}
               className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
               title="Close modal"
             >
