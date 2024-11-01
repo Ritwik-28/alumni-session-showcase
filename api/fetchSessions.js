@@ -1,8 +1,8 @@
 // api/fetchSessions.js
 import fetch from 'node-fetch';
-import { fetchDirectusToken, getDirectusToken } from './authenticate';
+import { fetchDirectusToken, getDirectusToken } from './authenticate.js';
 
-const DIRECTUS_URL = process.env.VITE_DIRECTUS_URL;
+const DIRECTUS_URL = process.env.DIRECTUS_URL;
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -22,7 +22,8 @@ export default async function handler(req, res) {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch data from Directus: ${response.statusText}`);
+        console.error(`Failed to fetch data from Directus: ${response.statusText}`);
+        return res.status(response.status).json({ error: 'Failed to fetch data from Directus' });
       }
 
       const data = await response.json();
