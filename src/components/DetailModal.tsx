@@ -19,6 +19,7 @@ interface DetailModalProps {
 export function DetailModal({ session, onClose }: DetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [showDownloadMessage, setShowDownloadMessage] = useState(false); // State for download message
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -33,6 +34,12 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
 
   const handleDownloadImage = () => {
     window.open(DirectusService.getAssetDownloadUrl(session.alumni_showcase), '_blank');
+
+    // Show download message
+    setShowDownloadMessage(true);
+    setTimeout(() => {
+      setShowDownloadMessage(false);
+    }, 2000); // Fade out after 2 seconds
   };
 
   const handleImageLoad = () => {
@@ -43,33 +50,38 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div
         ref={modalRef}
-        className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative"
       >
-        <div className="relative">
-          <div className="absolute right-4 top-4 flex gap-2">
-            <button
-              onClick={handleDownloadImage}
-              className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
-              title="Download image"
-            >
-              <Download className="w-5 h-5" />
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
-              title="Close modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          <img
-            src={DirectusService.getAssetUrl(session.alumni_image)}
-            alt={session.alumni_name}
-            loading="lazy"
-            onLoad={handleImageLoad}
-            className={`w-full h-64 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
-          />
+        <div className="absolute right-4 top-4 flex gap-2">
+          <button
+            onClick={handleDownloadImage}
+            className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
+            title="Download image"
+          >
+            <Download className="w-5 h-5" />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
+            title="Close modal"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
+        <img
+          src={DirectusService.getAssetUrl(session.alumni_image)}
+          alt={session.alumni_name}
+          loading="lazy"
+          onLoad={handleImageLoad}
+          className={`w-full h-64 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
+        />
+        
+        {/* Temporary download message */}
+        {showDownloadMessage && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded-lg shadow-md z-60">
+            <p className="text-gray-800">Download Started</p>
+          </div>
+        )}
 
         <div className="p-6">
           <div className="flex justify-between items-start">
@@ -84,6 +96,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
               >
                 <Linkedin className="w-5 h-5" />
+                LinkedIn Profile
               </a>
               {session.hike_number !== null && session.previous_role !== 'Fresher' && (
                 <div className="flex items-center gap-2 text-green-600">
