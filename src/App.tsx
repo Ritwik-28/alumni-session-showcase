@@ -10,9 +10,7 @@ export function App() {
   const [sessions, setSessions] = useState<AlumniSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedSession, setSelectedSession] = useState<AlumniSession | null>(
-    null
-  );
+  const [selectedSession, setSelectedSession] = useState<AlumniSession | null>(null);
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -27,9 +25,7 @@ export function App() {
         const sessionsData = await DirectusService.getSessions();
         setSessions(sessionsData);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'An unexpected error occurred'
-        );
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
       } finally {
         setLoading(false);
       }
@@ -46,10 +42,8 @@ export function App() {
   const programs = [...new Set(sessions.map((s) => s.program_name))].sort();
 
   const filteredSessions = sessions.filter((session) => {
-    const matchesCompany =
-      !selectedCompany || session.current_company === selectedCompany;
-    const matchesProgram =
-      !selectedProgram || session.program_name === selectedProgram;
+    const matchesCompany = !selectedCompany || session.current_company === selectedCompany;
+    const matchesProgram = !selectedProgram || session.program_name === selectedProgram;
     return matchesCompany && matchesProgram;
   });
 
@@ -146,18 +140,24 @@ export function App() {
                     </div>
                   </div>
 
+                  {/* Update the number of toggles based on a condition, such as the number of visible items */}
                   <div className="flex justify-center gap-2 mt-4">
-                    {filteredSessions.map((_, index) => (
+                    {filteredSessions.length > 1 && (
                       <button
-                        key={index}
                         className={`h-2 rounded-full transition-all ${
-                          currentSlide === index
-                            ? 'w-4 bg-blue-600'
-                            : 'w-2 bg-gray-300'
+                          currentSlide === 0 ? 'w-4 bg-blue-600' : 'w-2 bg-gray-300'
                         }`}
-                        onClick={() => setCurrentSlide(index)}
+                        onClick={() => setCurrentSlide(0)}
                       />
-                    ))}
+                    )}
+                    {filteredSessions.length > 1 && (
+                      <button
+                        className={`h-2 rounded-full transition-all ${
+                          currentSlide === 1 ? 'w-4 bg-blue-600' : 'w-2 bg-gray-300'
+                        }`}
+                        onClick={() => setCurrentSlide(1)}
+                      />
+                    )}
                   </div>
                 </div>
               )}
