@@ -24,7 +24,7 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
         <img
           src={DirectusService.getAssetUrl(session.alumni_showcase)}
           alt={session.alumni_name}
-          loading="lazy"  // Lazy loading attribute
+          loading="lazy"
           onLoad={handleImageLoad}
           className={`object-cover w-full h-48 transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
         />

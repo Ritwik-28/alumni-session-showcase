@@ -65,7 +65,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           <img
             src={DirectusService.getAssetUrl(session.alumni_image)}
             alt={session.alumni_name}
-            loading="lazy"  // Lazy loading attribute
+            loading="lazy"
             onLoad={handleImageLoad}
             className={`w-full h-64 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
           />

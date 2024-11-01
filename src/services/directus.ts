@@ -1,11 +1,7 @@
+// services/directus.ts
 import type { AlumniSession } from '../types';
 
-interface AuthResponse {
-  data: {
-    access_token: string;
-    expires: number;
-  };
-}
+const DIRECTUS_BASE_URL = import.meta.env.VITE_DIRECTUS_URL || 'https://directus.crio.do';
 
 export class DirectusService {
   private static token: string | null = null;
@@ -26,7 +22,7 @@ export class DirectusService {
         throw new Error('Authentication failed');
       }
 
-      const auth = (await response.json()) as AuthResponse;
+      const auth = await response.json();
       this.token = auth.data.access_token;
       this.tokenExpiry = Date.now() + auth.data.expires * 1000;
       this.scheduleTokenRefresh(auth.data.expires);
@@ -102,12 +98,12 @@ export class DirectusService {
     }
   }
 
-  // Utility methods for asset URLs
+  // Utility methods for direct asset URLs
   static getAssetUrl(fileId: string): string {
-    return `/api/getAsset/${fileId}`; // Update to use a serverless function if needed
+    return `${DIRECTUS_BASE_URL}/assets/${fileId}`;
   }
 
   static getAssetDownloadUrl(fileId: string): string {
-    return `/api/getAsset/${fileId}?download=true`; // Update to use a serverless function if needed
+    return `${DIRECTUS_BASE_URL}/assets/${fileId}?download=true`;
   }
 }
