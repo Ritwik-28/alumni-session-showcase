@@ -39,7 +39,10 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-700 transition-colors"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent the click from bubbling up to the card
+            }}
+            title="View LinkedIn Profile" // Added title for accessibility
           >
             <Linkedin className="w-5 h-5" />
           </a>
