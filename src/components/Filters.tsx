@@ -40,7 +40,7 @@ export function Filters({
   return (
     <div className="flex flex-col items-center gap-4 mb-12">
       <h1 className="text-4xl font-bold text-gray-900 mb-8">
-        Connect with Alumni
+        Book Alumni Session
       </h1>
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative">
