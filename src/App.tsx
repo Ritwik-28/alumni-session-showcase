@@ -14,10 +14,10 @@ export function App() {
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
+  
   const touchStart = useRef(0);
   const touchEnd = useRef(0);
-  const isTouching = useRef(false); // Flag to indicate if the user is touching
-  const swipeTimeout = useRef<number | null>(null); // Changed from NodeJS.Timeout to number
+  const isTouching = useRef(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +51,7 @@ export function App() {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStart.current = e.targetTouches[0].clientX;
-    isTouching.current = true; // Set the flag to true on touch start
+    isTouching.current = true;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -59,35 +59,24 @@ export function App() {
   };
 
   const handleTouchEnd = () => {
-    const minSwipeDistance = 75; // Increased swipe distance for better user experience
+    const minSwipeDistance = 50; // Minimum distance to detect swipe
     const swipeDistance = touchStart.current - touchEnd.current;
 
-    // Clear the previous timeout if it exists
-    if (swipeTimeout.current) {
-      clearTimeout(swipeTimeout.current);
-    }
-
-    // Check if a swipe or a tap occurred
-    swipeTimeout.current = setTimeout(() => {
-      if (isTouching.current) {
-        // Prevent swipe action if it's a tap
-        if (Math.abs(swipeDistance) > minSwipeDistance) {
-          if (swipeDistance > 0) {
-            setCurrentSlide((prev) =>
-              prev === filteredSessions.length - 1 ? 0 : prev + 1
-            );
-          } else {
-            setCurrentSlide((prev) =>
-              prev === 0 ? filteredSessions.length - 1 : prev - 1
-            );
-          }
+    if (isTouching.current) {
+      if (Math.abs(swipeDistance) > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          // Swipe left
+          setCurrentSlide((prev) => (prev + 1 >= filteredSessions.length ? 0 : prev + 1));
         } else {
-          // Handle tap if it's not a swipe
-          setSelectedSession(filteredSessions[currentSlide]);
+          // Swipe right
+          setCurrentSlide((prev) => (prev - 1 < 0 ? filteredSessions.length - 1 : prev - 1));
         }
+      } else {
+        // Handle tap
+        setSelectedSession(filteredSessions[currentSlide]);
       }
-      isTouching.current = false; // Reset the flag on touch end
-    }, 100); // Small delay to allow for determining tap vs swipe
+    }
+    isTouching.current = false;
   };
 
   if (error) {
@@ -128,61 +117,46 @@ export function App() {
             <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         ) : (
-          <>
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSessions.map((session) => (
-                <SessionCard
-                  key={session.id}
-                  session={session}
-                  onClick={() => setSelectedSession(session)}
+          <div className="relative">
+            {filteredSessions.length > 0 && (
+              <div
+                className="overflow-hidden touch-pan-y"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${currentSlide * (100 / filteredSessions.length)}%)` }}>
+                  {filteredSessions.map((session, index) => (
+                    <div 
+                      key={session.id} 
+                      className={`w-3/4 mx-auto ${index === currentSlide ? '' : 'opacity-50'}`} // Highlight active card
+                    >
+                      <SessionCard
+                        session={session}
+                        onClick={() => setSelectedSession(session)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Dot indicators for current slide set */}
+            <div className="flex justify-center gap-2 mt-4">
+              {Array.from({ length: Math.ceil(filteredSessions.length / 1) }, (_, index) => (
+                <button
+                  key={index}
+                  className={`h-2 rounded-full transition-all ${currentSlide === index ? 'w-4 bg-blue-600' : 'w-2 bg-gray-300'}`}
+                  onClick={() => setCurrentSlide(index)}
                 />
               ))}
             </div>
-
-            <div className="md:hidden">
-              {filteredSessions.length > 0 && (
-                <div className="relative">
-                  <div
-                    className="overflow-hidden touch-pan-y"
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                  >
-                    <div className="w-full max-w-sm mx-auto px-4">
-                      <SessionCard
-                        session={filteredSessions[currentSlide]}
-                        onClick={() => setSelectedSession(filteredSessions[currentSlide])}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Show exactly 5 toggles */}
-                  <div className="flex justify-center gap-2 mt-4">
-                    {[0, 1, 2, 3, 4].map((index) => (
-                      <button
-                        key={index}
-                        className={`h-2 rounded-full transition-all ${
-                          currentSlide === index ? 'w-4 bg-blue-600' : 'w-2 bg-gray-300'
-                        }`}
-                        onClick={() => {
-                          if (index < filteredSessions.length) {
-                            setCurrentSlide(index);
-                          }
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
+          </div>
         )}
 
         {filteredSessions.length === 0 && !loading && (
           <div className="text-center py-12">
-            <p className="text-gray-500">
-              No alumni found with the selected filters.
-            </p>
+            <p className="text-gray-500">No alumni found with the selected filters.</p>
           </div>
         )}
 
