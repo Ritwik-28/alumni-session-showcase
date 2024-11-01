@@ -38,7 +38,7 @@ export function Filters({
     : companies;
 
   return (
-    <div className="flex flex-col items-center gap-4 mb-12">
+    <div className="flex flex-col items-center gap-4 mb-12 sticky top-0 bg-white z-10 shadow">
       <h1 className="text-4xl font-bold text-gray-900 mb-8">
         Book Alumni Session
       </h1>
