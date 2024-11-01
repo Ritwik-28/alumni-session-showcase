@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   X,
   Briefcase,
-  Building,
+  Building2,
   GraduationCap,
   Linkedin,
   Download,
@@ -19,15 +19,6 @@ interface DetailModalProps {
 export function DetailModal({ session, onClose }: DetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchImageUrl() {
-      const url = await DirectusService.getAssetUrl(session.alumni_image);
-      setImageUrl(url);
-    }
-    fetchImageUrl();
-  }, [session.alumni_image]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -40,9 +31,8 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  const handleDownloadImage = async () => {
-    const downloadUrl = await DirectusService.getAssetDownloadUrl(session.alumni_showcase);
-    window.open(downloadUrl, '_blank');
+  const handleDownloadImage = () => {
+    window.open(DirectusService.getAssetDownloadUrl(session.alumni_showcase), '_blank');
   };
 
   const handleImageLoad = () => {
@@ -72,23 +62,20 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
               <X className="w-5 h-5" />
             </button>
           </div>
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={session.alumni_name}
-              loading="lazy"
-              onLoad={handleImageLoad}
-              className={`w-full h-64 object-cover transition-opacity duration-500 ${
-                imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'
-              }`}
-            />
-          )}
+          <img
+            src={DirectusService.getAssetUrl(session.alumni_image)}
+            alt={session.alumni_name}
+            loading="lazy"
+            onLoad={handleImageLoad}
+            className={`w-full h-64 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
+          />
         </div>
 
         <div className="p-6">
-          {/* Adjusted spacing between name and role */}
           <div className="flex justify-between items-start">
-            <h2 className="text-2xl font-bold text-gray-900">{session.alumni_name}</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {session.alumni_name}
+            </h2>
             <div className="flex flex-col items-end gap-2">
               <a
                 href={session.alumni_linkedin_profile}
@@ -99,7 +86,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                 <Linkedin className="w-5 h-5" />
                 LinkedIn Profile
               </a>
-              {/* Conditionally render hike only if previous role is not 'Fresher' */}
               {session.previous_role !== 'Fresher' && (
                 <div className="flex items-center gap-2 text-green-600">
                   <TrendingUp className="w-5 h-5" />
@@ -118,7 +104,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             </div>
 
             <div className="flex items-center gap-2 text-gray-600">
-              <Building className="w-5 h-5 text-gray-400" />
+              <Building2 className="w-5 h-5 text-gray-400" />
               <span>Previously {session.previous_role}</span>
             </div>
 
@@ -131,7 +117,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           <div className="flex flex-col gap-4 mb-4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-sm text-gray-500 mb-2">Alumni History</p>
-              <div
+              <div 
                 className="prose prose-sm max-w-none text-gray-900"
                 dangerouslySetInnerHTML={{ __html: session.alumni_history }}
               />
