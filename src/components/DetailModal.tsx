@@ -55,10 +55,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
               <Download className="w-5 h-5" />
             </button>
             <button
-              onClick={() => {
-                console.log('Close button clicked'); // Debugging line
-                onClose(); // Ensure onClose is called
-              }}
+              onClick={onClose}
               className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
               title="Close modal"
             >
@@ -117,15 +114,18 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 mb-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-500 mb-2">Alumni History</p>
-              <div 
-                className="prose prose-sm max-w-none text-gray-900"
-                dangerouslySetInnerHTML={{ __html: session.alumni_history }}
-              />
+          {/* Show Alumni History only if it's not null */}
+          {session.alumni_history && (
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-500 mb-2">Alumni History</p>
+                <div 
+                  className="prose prose-sm max-w-none text-gray-900"
+                  dangerouslySetInnerHTML={{ __html: session.alumni_history }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <button
             onClick={() =>
