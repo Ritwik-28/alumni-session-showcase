@@ -1,6 +1,4 @@
-import type { AlumniSession, DirectusResponse } from '../types';
-
-const DIRECTUS_URL = import.meta.env.VITE_DIRECTUS_URL;
+import type { AlumniSession } from '../types';
 
 interface AuthResponse {
   data: {
@@ -54,12 +52,12 @@ export class DirectusService {
     }
   }
 
-  // Fetch data with the authorization token
+  // Fetch data with the authorization token using the serverless function
   private static async fetchWithAuth<T>(endpoint: string): Promise<T> {
     await this.ensureValidToken();
 
     try {
-      const response = await fetch(`${DIRECTUS_URL}${endpoint}`, {
+      const response = await fetch(endpoint, {
         headers: {
           Authorization: `Bearer ${this.token}`,
         },
@@ -82,25 +80,34 @@ export class DirectusService {
     }
   }
 
-  // Utility methods for asset URLs
-  static getAssetUrl(fileId: string): string {
-    return `${DIRECTUS_URL}/assets/${fileId}`;
-  }
-
-  static getAssetDownloadUrl(fileId: string): string {
-    return `${DIRECTUS_URL}/assets/${fileId}?download`;
-  }
-
-  // Fetch published alumni sessions from the Directus collection
+  // Fetch published alumni sessions by calling the serverless function
   static async getSessions(): Promise<AlumniSession[]> {
     try {
-      const response = await this.fetchWithAuth<DirectusResponse<AlumniSession>>(
-        `/items/alumni_session?filter[status][_eq]=published&limit=-1`
-      );
-      return response.data;
+      const response = await fetch('/api/fetchSessions', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch alumni sessions');
+      }
+
+      const data = await response.json();
+      return data.data;
     } catch (error) {
       console.error('Error fetching sessions:', error);
       throw new Error('Failed to fetch alumni sessions');
     }
+  }
+
+  // Utility methods for asset URLs
+  static getAssetUrl(fileId: string): string {
+    return `/api/getAsset/${fileId}`; // Update to use a serverless function if needed
+  }
+
+  static getAssetDownloadUrl(fileId: string): string {
+    return `/api/getAsset/${fileId}?download=true`; // Update to use a serverless function if needed
   }
 }
