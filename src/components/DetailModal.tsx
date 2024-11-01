@@ -19,7 +19,7 @@ interface DetailModalProps {
 export function DetailModal({ session, onClose }: DetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [showDownloadMessage, setShowDownloadMessage] = useState(false); // State for download message
+  const [showDownloadMessage, setShowDownloadMessage] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -33,13 +33,18 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
   }, [onClose]);
 
   const handleDownloadImage = () => {
-    window.open(DirectusService.getAssetDownloadUrl(session.alumni_showcase), '_blank');
-
-    // Show download message
-    setShowDownloadMessage(true);
-    setTimeout(() => {
-      setShowDownloadMessage(false);
-    }, 2000); // Fade out after 2 seconds
+    const downloadUrl = DirectusService.getAssetDownloadUrl(session.alumni_showcase);
+    if (downloadUrl) {
+      window.open(downloadUrl, '_blank');
+      
+      // Show download message
+      setShowDownloadMessage(true);
+      setTimeout(() => {
+        setShowDownloadMessage(false);
+      }, 2000); // Fade out after 2 seconds
+    } else {
+      console.error("Download URL is not available."); // Error handling if the URL is not available
+    }
   };
 
   const handleImageLoad = () => {
@@ -57,6 +62,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             onClick={handleDownloadImage}
             className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
             title="Download image"
+            aria-label="Download image"
           >
             <Download className="w-5 h-5" />
           </button>
@@ -64,6 +70,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             onClick={onClose}
             className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
             title="Close modal"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -73,6 +80,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           alt={session.alumni_name}
           loading="lazy"
           onLoad={handleImageLoad}
+          onError={() => setImageLoaded(false)} // Handle image load error
           className={`w-full h-64 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
         />
         
