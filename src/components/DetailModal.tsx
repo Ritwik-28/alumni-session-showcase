@@ -89,7 +89,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                 <Linkedin className="w-5 h-5" />
                 LinkedIn Profile
               </a>
-              {session.previous_role !== 'Fresher' && (
+              {session.hike_number !== null && session.previous_role !== 'Fresher' && (
                 <div className="flex items-center gap-2 text-green-600">
                   <TrendingUp className="w-5 h-5" />
                   <span className="font-semibold">{session.hike_number}% Hike</span>
