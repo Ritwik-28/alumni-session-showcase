@@ -13,6 +13,7 @@ interface AuthResponse {
 export class DirectusService {
   private static token: string | null = null;
   private static tokenExpiry: number | null = null;
+  private static refreshTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   private static async authenticate(): Promise<void> {
     try {
@@ -33,11 +34,20 @@ export class DirectusService {
 
       const auth = (await response.json()) as AuthResponse;
       this.token = auth.data.access_token;
-      this.tokenExpiry = Date.now() + auth.data.expires;
+      this.tokenExpiry = Date.now() + auth.data.expires * 1000;
+      this.scheduleTokenRefresh(auth.data.expires);
     } catch (error) {
       console.error('Authentication error:', error);
       throw new Error('Failed to authenticate');
     }
+  }
+
+  private static scheduleTokenRefresh(expiresIn: number): void {
+    if (this.refreshTimeoutId) {
+      clearTimeout(this.refreshTimeoutId);
+    }
+    const refreshTime = (expiresIn - 10) * 1000; // Refresh 10 seconds before expiry
+    this.refreshTimeoutId = setTimeout(() => this.authenticate(), refreshTime);
   }
 
   private static async ensureValidToken(): Promise<void> {
