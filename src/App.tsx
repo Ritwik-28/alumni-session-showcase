@@ -17,6 +17,7 @@ export function App() {
   const touchStart = useRef(0);
   const touchEnd = useRef(0);
   const isTouching = useRef(false); // Flag to indicate if the user is touching
+  const swipeTimeout = useRef<number | null>(null); // Changed from NodeJS.Timeout to number
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,28 +59,35 @@ export function App() {
   };
 
   const handleTouchEnd = () => {
-    const minSwipeDistance = 50;
+    const minSwipeDistance = 75; // Increased swipe distance for better user experience
     const swipeDistance = touchStart.current - touchEnd.current;
 
-    if (isTouching.current) {
-      // Prevent swipe action if it's a tap
-      if (Math.abs(swipeDistance) > minSwipeDistance) {
-        if (swipeDistance > 0) {
-          setCurrentSlide((prev) =>
-            prev === filteredSessions.length - 1 ? 0 : prev + 1
-          );
-        } else {
-          setCurrentSlide((prev) =>
-            prev === 0 ? filteredSessions.length - 1 : prev - 1
-          );
-        }
-      } else {
-        // Handle tap if it's not a swipe
-        setSelectedSession(filteredSessions[currentSlide]);
-      }
+    // Clear the previous timeout if it exists
+    if (swipeTimeout.current) {
+      clearTimeout(swipeTimeout.current);
     }
-    
-    isTouching.current = false; // Reset the flag on touch end
+
+    // Check if a swipe or a tap occurred
+    swipeTimeout.current = setTimeout(() => {
+      if (isTouching.current) {
+        // Prevent swipe action if it's a tap
+        if (Math.abs(swipeDistance) > minSwipeDistance) {
+          if (swipeDistance > 0) {
+            setCurrentSlide((prev) =>
+              prev === filteredSessions.length - 1 ? 0 : prev + 1
+            );
+          } else {
+            setCurrentSlide((prev) =>
+              prev === 0 ? filteredSessions.length - 1 : prev - 1
+            );
+          }
+        } else {
+          // Handle tap if it's not a swipe
+          setSelectedSession(filteredSessions[currentSlide]);
+        }
+      }
+      isTouching.current = false; // Reset the flag on touch end
+    }, 100); // Small delay to allow for determining tap vs swipe
   };
 
   if (error) {
