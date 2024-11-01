@@ -8,7 +8,7 @@ export class DirectusService {
   private static tokenExpiry: number | null = null;
   private static refreshTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
-  // Authenticate by calling the backend endpoint
+  // Method to authenticate and retrieve a token
   private static async authenticate(): Promise<void> {
     try {
       const response = await fetch('/api/authenticate', {
@@ -32,7 +32,7 @@ export class DirectusService {
     }
   }
 
-  // Schedule a token refresh a few seconds before it expires
+  // Schedule token refresh before it expires
   private static scheduleTokenRefresh(expiresIn: number): void {
     if (this.refreshTimeoutId) {
       clearTimeout(this.refreshTimeoutId);
@@ -48,35 +48,19 @@ export class DirectusService {
     }
   }
 
-  // Fetch data with the authorization token using the serverless function
-  private static async fetchWithAuth<T>(endpoint: string): Promise<T> {
+  // Fetch an asset URL with the token
+  static async getAssetUrl(fileId: string): Promise<string> {
     await this.ensureValidToken();
-
-    try {
-      const response = await fetch(endpoint, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Token might have expired; retry after clearing token
-          this.token = null;
-          this.tokenExpiry = null;
-          return this.fetchWithAuth(endpoint);
-        }
-        throw new Error(`API Error: ${response.statusText}`);
-      }
-
-      return response.json();
-    } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
-    }
+    return `${DIRECTUS_BASE_URL}/assets/${fileId}?access_token=${this.token}`;
   }
 
-  // Fetch published alumni sessions by calling the serverless function
+  // Fetch an asset download URL with the token
+  static async getAssetDownloadUrl(fileId: string): Promise<string> {
+    await this.ensureValidToken();
+    return `${DIRECTUS_BASE_URL}/assets/${fileId}?download=true&access_token=${this.token}`;
+  }
+
+  // Fetch published alumni sessions by calling a serverless function
   static async getSessions(): Promise<AlumniSession[]> {
     try {
       const response = await fetch('/api/fetchSessions', {
@@ -96,14 +80,5 @@ export class DirectusService {
       console.error('Error fetching sessions:', error);
       throw new Error('Failed to fetch alumni sessions');
     }
-  }
-
-  // Utility methods for direct asset URLs
-  static getAssetUrl(fileId: string): string {
-    return `${DIRECTUS_BASE_URL}/assets/${fileId}`;
-  }
-
-  static getAssetDownloadUrl(fileId: string): string {
-    return `${DIRECTUS_BASE_URL}/assets/${fileId}?download=true`;
   }
 }
