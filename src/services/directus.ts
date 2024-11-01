@@ -1,7 +1,6 @@
 import type { AlumniSession, DirectusResponse } from '../types';
 
 const DIRECTUS_URL = import.meta.env.VITE_DIRECTUS_URL;
-const COLLECTION_NAME = import.meta.env.VITE_COLLECTION_NAME;
 
 interface AuthResponse {
   data: {
@@ -15,17 +14,14 @@ export class DirectusService {
   private static tokenExpiry: number | null = null;
   private static refreshTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
+  // Authenticate by calling the backend endpoint
   private static async authenticate(): Promise<void> {
     try {
-      const response = await fetch(`${DIRECTUS_URL}/auth/login`, {
+      const response = await fetch('/api/authenticate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email: import.meta.env.VITE_DIRECTUS_EMAIL,
-          password: import.meta.env.VITE_DIRECTUS_PASSWORD,
-        }),
       });
 
       if (!response.ok) {
@@ -42,6 +38,7 @@ export class DirectusService {
     }
   }
 
+  // Schedule a token refresh a few seconds before it expires
   private static scheduleTokenRefresh(expiresIn: number): void {
     if (this.refreshTimeoutId) {
       clearTimeout(this.refreshTimeoutId);
@@ -50,12 +47,14 @@ export class DirectusService {
     this.refreshTimeoutId = setTimeout(() => this.authenticate(), refreshTime);
   }
 
+  // Ensure the token is valid; re-authenticate if necessary
   private static async ensureValidToken(): Promise<void> {
     if (!this.token || !this.tokenExpiry || Date.now() >= this.tokenExpiry) {
       await this.authenticate();
     }
   }
 
+  // Fetch data with the authorization token
   private static async fetchWithAuth<T>(endpoint: string): Promise<T> {
     await this.ensureValidToken();
 
@@ -68,6 +67,7 @@ export class DirectusService {
 
       if (!response.ok) {
         if (response.status === 401) {
+          // Token might have expired; retry after clearing token
           this.token = null;
           this.tokenExpiry = null;
           return this.fetchWithAuth(endpoint);
@@ -82,6 +82,7 @@ export class DirectusService {
     }
   }
 
+  // Utility methods for asset URLs
   static getAssetUrl(fileId: string): string {
     return `${DIRECTUS_URL}/assets/${fileId}`;
   }
@@ -90,10 +91,11 @@ export class DirectusService {
     return `${DIRECTUS_URL}/assets/${fileId}?download`;
   }
 
+  // Fetch published alumni sessions from the Directus collection
   static async getSessions(): Promise<AlumniSession[]> {
     try {
       const response = await this.fetchWithAuth<DirectusResponse<AlumniSession>>(
-        `/items/${COLLECTION_NAME}?filter[status][_eq]=published&limit=-1`
+        `/items/alumni_session?filter[status][_eq]=published&limit=-1`
       );
       return response.data;
     } catch (error) {
