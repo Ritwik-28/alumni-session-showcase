@@ -2,7 +2,7 @@
 import fetch from 'node-fetch';
 import { fetchDirectusToken, getDirectusToken } from './authenticate.js';
 
-const DIRECTUS_URL = process.env.DIRECTUS_URL;
+const DIRECTUS_URL = process.env.VITE_DIRECTUS_URL;
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
