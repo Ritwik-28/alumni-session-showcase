@@ -7,6 +7,8 @@ export interface AlumniSession {
   program_name: string;
   alumni_history: string;
   alumni_linkedin_profile: string;
+  alumni_portfolio?: string; // New optional field for portfolio link
+  alumni_transition?: string; // New optional field for transition
   previous_role: string;
   current_role: string;
   current_company: string;

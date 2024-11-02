@@ -59,6 +59,11 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     trackEvent(`modal_${session.id}_view_linkedin`, 'view_linkedin');
   };
 
+  const handlePortfolioClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    trackEvent(`modal_${session.id}_view_portfolio`, 'view_portfolio');
+  };
+
   const handleScheduleSessionClick = () => {
     trackEvent(`modal_${session.id}_schedule_session`, 'schedule_session');
     window.open(
@@ -130,11 +135,23 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
-                onClick={handleLinkedInClick} // Track LinkedIn click
+                onClick={handleLinkedInClick}
               >
                 <Linkedin className="w-5 h-5" />
                 LinkedIn Profile
               </a>
+              {session.alumni_portfolio && (
+                <a
+                  href={session.alumni_portfolio}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
+                  onClick={handlePortfolioClick} // Track portfolio click
+                >
+                  <Briefcase className="w-5 h-5" />
+                  Portfolio
+                </a>
+              )}
               {session.hike_number !== null && session.previous_role !== 'Fresher' && (
                 <div className="flex items-center gap-2 text-green-600">
                   <TrendingUp className="w-5 h-5" />

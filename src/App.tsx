@@ -43,7 +43,7 @@ export function App() {
 
   const companies = [...new Set(sessions.map((s) => s.current_company))].sort();
   const programs = [...new Set(sessions.map((s) => s.program_name))].sort();
-  const transitions = [...new Set(sessions.map((s) => s.alumni_transition))].sort(); // Unique transitions
+  const transitions = [...new Set(sessions.map((s) => s.alumni_transition).filter((item): item is string => item !== undefined))].sort(); // Unique transitions without undefined
 
   const filteredSessions = sessions.filter((session) => {
     const matchesCompany = !selectedCompany || session.current_company === selectedCompany;
