@@ -13,11 +13,12 @@ export function App() {
   const [selectedSession, setSelectedSession] = useState<AlumniSession | null>(null);
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
+  const [selectedTransition, setSelectedTransition] = useState(''); // New state for transition filter
   const [currentSlide, setCurrentSlide] = useState(0);
   const touchStart = useRef(0);
   const touchEnd = useRef(0);
-  const isTouching = useRef(false); // Flag to indicate if the user is touching
-  const swipeTimeout = useRef<number | null>(null); // Using number | null for browser compatibility
+  const isTouching = useRef(false);
+  const swipeTimeout = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,20 +39,22 @@ export function App() {
 
   useEffect(() => {
     setCurrentSlide(0);
-  }, [selectedCompany, selectedProgram]);
+  }, [selectedCompany, selectedProgram, selectedTransition]); // Reset slide on filter change
 
   const companies = [...new Set(sessions.map((s) => s.current_company))].sort();
   const programs = [...new Set(sessions.map((s) => s.program_name))].sort();
+  const transitions = [...new Set(sessions.map((s) => s.alumni_transition))].sort(); // Unique transitions
 
   const filteredSessions = sessions.filter((session) => {
     const matchesCompany = !selectedCompany || session.current_company === selectedCompany;
     const matchesProgram = !selectedProgram || session.program_name === selectedProgram;
-    return matchesCompany && matchesProgram;
+    const matchesTransition = !selectedTransition || session.alumni_transition === selectedTransition;
+    return matchesCompany && matchesProgram && matchesTransition;
   });
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStart.current = e.targetTouches[0].clientX;
-    isTouching.current = true; // Set the flag to true on touch start
+    isTouching.current = true;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -59,18 +62,15 @@ export function App() {
   };
 
   const handleTouchEnd = () => {
-    const minSwipeDistance = 75; // Increased swipe distance for better user experience
+    const minSwipeDistance = 75;
     const swipeDistance = touchStart.current - touchEnd.current;
 
-    // Clear the previous timeout if it exists
     if (swipeTimeout.current) {
       clearTimeout(swipeTimeout.current);
     }
 
-    // Check if a swipe or a tap occurred
-    swipeTimeout.current = window.setTimeout(() => { // Explicitly using window.setTimeout
+    swipeTimeout.current = window.setTimeout(() => {
       if (isTouching.current) {
-        // Prevent swipe action if it's a tap
         if (Math.abs(swipeDistance) > minSwipeDistance) {
           if (swipeDistance > 0) {
             setCurrentSlide((prev) =>
@@ -82,12 +82,11 @@ export function App() {
             );
           }
         } else {
-          // Handle tap if it's not a swipe
           setSelectedSession(filteredSessions[currentSlide]);
         }
       }
-      isTouching.current = false; // Reset the flag on touch end
-    }, 100); // Small delay to allow for determining tap vs swipe
+      isTouching.current = false;
+    }, 100);
   };
 
   if (error) {
@@ -116,11 +115,14 @@ export function App() {
         <Filters
           companies={companies}
           programs={programs}
+          transitions={transitions} // Pass transitions
           selectedCompany={selectedCompany}
           selectedProgram={selectedProgram}
+          selectedTransition={selectedTransition} // Pass selected transition
           sessions={sessions}
           onCompanyChange={setSelectedCompany}
           onProgramChange={setSelectedProgram}
+          onTransitionChange={setSelectedTransition} // Pass transition change handler
         />
 
         {loading ? (
@@ -156,7 +158,6 @@ export function App() {
                     </div>
                   </div>
 
-                  {/* Show exactly 5 toggles */}
                   <div className="flex justify-center gap-2 mt-4">
                     {[0, 1, 2, 3, 4].map((index) => (
                       <button
