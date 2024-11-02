@@ -28,15 +28,14 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className="relative bg-cover bg-center rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer overflow-hidden group"
+      className="relative bg-cover bg-center rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden group transform hover:scale-105" // Added hover effect and scale
       style={{
         backgroundImage: `url(${DirectusService.getAssetUrl(session.alumni_showcase)})`,
-        width: '100%',    // Set to 100% to fit in the grid
-        paddingBottom: '100%', // Maintains 1:1 aspect ratio by making height equal to width
+        width: '100%',    // Maintain responsive layout in the grid
+        paddingBottom: '100%', // Ensures 1:1 aspect ratio
       }}
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black opacity-50" />
+      {/* Removed overlay */}
     </div>
   );
 }
