@@ -75,7 +75,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div
         ref={modalRef}
-        className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative"
+        className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative pb-16" // Added padding bottom for floating CTA
       >
         <img
           src={DirectusService.getAssetUrl(session.alumni_image)}
@@ -113,7 +113,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
         )}
 
         <div className="p-4">
-          <div className="flex justify-between items-start mb-2">
+          <div className="flex justify-between items-start mb-1">
             <h2 className="text-lg font-bold text-gray-900">{session.alumni_name}</h2>
             <div className="flex flex-col items-end gap-1">
               <a
@@ -147,7 +147,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             </div>
           </div>
 
-          <div className="space-y-1 text-sm text-gray-700"> {/* Reduced margin */}
+          <div className="space-y-1 text-sm text-gray-700">
             <div className="flex items-center gap-1">
               <Briefcase className="w-4 h-4 text-gray-400" />
               <span>{session.current_role} at {session.current_company}</span>
@@ -171,10 +171,13 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
               />
             </div>
           )}
+        </div>
 
+        {/* Floating CTA */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
           <button
             onClick={handleScheduleSessionClick}
-            className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 text-sm mt-3"
+            className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 text-sm"
           >
             Schedule a 1:1 Alumni Session
           </button>
