@@ -31,8 +31,8 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
       className="relative bg-cover bg-center rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer overflow-hidden group"
       style={{
         backgroundImage: `url(${DirectusService.getAssetUrl(session.alumni_showcase)})`,
-        width: '800px',  // Set the width of the card
-        height: '800px',  // Set the height of the card
+        width: '100%',    // Set to 100% to fit in the grid
+        paddingBottom: '100%', // Maintains 1:1 aspect ratio by making height equal to width
       }}
     >
       {/* Overlay */}
