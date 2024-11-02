@@ -28,7 +28,7 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className="relative bg-cover bg-center rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden group transform hover:scale-105" // Added hover effect and scale
+      className="relative bg-cover bg-center rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer overflow-hidden group transform hover:scale-101" // Added hover effect and scale
       style={{
         backgroundImage: `url(${DirectusService.getAssetUrl(session.alumni_showcase)})`,
         width: '100%',    // Maintain responsive layout in the grid
