@@ -75,7 +75,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div
         ref={modalRef}
-        className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative pb-16" // Added padding bottom for floating CTA
+        className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative"
       >
         <img
           src={DirectusService.getAssetUrl(session.alumni_image)}
@@ -173,8 +173,8 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           )}
         </div>
 
-        {/* Floating CTA */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
+        {/* Fixed CTA inside modal */}
+        <div className="sticky bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 z-20">
           <button
             onClick={handleScheduleSessionClick}
             className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 text-sm"
