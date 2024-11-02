@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Linkedin } from 'lucide-react';
 import type { AlumniSession } from '../types';
 import { DirectusService } from '../services/directus';
@@ -9,12 +9,6 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session, onClick }: SessionCardProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
-
   // Track card opening event
   const handleCardClick = () => {
     onClick();
@@ -39,41 +33,34 @@ export function SessionCard({ session, onClick }: SessionCardProps) {
   };
 
   return (
-    <div 
+    <div
       onClick={handleCardClick}
-      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer overflow-hidden group"
+      className="relative bg-cover bg-center rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer overflow-hidden group"
+      style={{
+        backgroundImage: `url(${DirectusService.getAssetUrl(session.alumni_showcase)})`,
+        height: '300px', // Set a fixed height for the card
+      }}
     >
-      <div className="aspect-w-16 aspect-h-9 relative">
-        <img
-          src={DirectusService.getAssetUrl(session.alumni_showcase)}
-          alt={session.alumni_name}
-          loading="lazy"
-          onLoad={handleImageLoad}
-          className={`object-cover w-full h-48 transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
-        />
-      </div>
-      <div className="p-6">
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black opacity-50" />
+
+      {/* Content */}
+      <div className="relative z-10 p-6 flex flex-col justify-end h-full text-white">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-xl font-semibold text-gray-900">
-            {session.alumni_name}
-          </h3>
+          <h3 className="text-xl font-semibold">{session.alumni_name}</h3>
           <a
             href={session.alumni_linkedin_profile}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-700 transition-colors"
-            onClick={handleLinkedInClick} // Updated to track LinkedIn click
-            title="View LinkedIn Profile" // Added title for accessibility
+            className="text-blue-400 hover:text-blue-500 transition-colors"
+            onClick={handleLinkedInClick}
+            title="View LinkedIn Profile"
           >
             <Linkedin className="w-5 h-5" />
           </a>
         </div>
-        <p className="text-gray-600 font-medium">
-          {session.current_role}
-        </p>
-        <p className="text-gray-500 text-sm">
-          {session.current_company}
-        </p>
+        <p className="text-white font-medium">{session.current_role}</p>
+        <p className="text-gray-300 text-sm">{session.current_company}</p>
       </div>
     </div>
   );
