@@ -113,55 +113,62 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
         )}
 
         <div className="p-4">
-          <div className="flex justify-between items-start mb-1">
+          {/* Alumni Name and LinkedIn CTA */}
+          <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold text-gray-900">{session.alumni_name}</h2>
-            <div className="flex flex-col items-end gap-1">
-              <a
-                href={session.alumni_linkedin_profile}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
-                onClick={handleLinkedInClick}
-              >
-                <Linkedin className="w-4 h-4" />
-                LinkedIn Profile
-              </a>
-              {session.alumni_portfolio && (
-                <a
-                  href={session.alumni_portfolio}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
-                  onClick={handlePortfolioClick}
-                >
-                  <BookMarked className="w-4 h-4" />
-                  Portfolio
-                </a>
-              )}
-              {session.hike_number !== null && session.previous_role !== 'Fresher' && (
-                <div className="flex items-center gap-1 text-green-600 text-sm">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="font-semibold">{session.hike_number}% Hike</span>
-                </div>
-              )}
-            </div>
+            <a
+              href={session.alumni_linkedin_profile}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+              onClick={handleLinkedInClick}
+            >
+              <Linkedin className="w-4 h-4" />
+              LinkedIn Profile
+            </a>
           </div>
 
-          <div className="space-y-1 text-sm text-gray-700">
+          {/* Current Role/Company and Portfolio CTA */}
+          <div className="flex justify-between items-center text-sm text-gray-700 mb-2">
             <div className="flex items-center gap-1">
               <Briefcase className="w-4 h-4 text-gray-400" />
               <span>{session.current_role} at {session.current_company}</span>
             </div>
+            {session.alumni_portfolio && (
+              <a
+                href={session.alumni_portfolio}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                onClick={handlePortfolioClick}
+              >
+                <BookMarked className="w-4 h-4" />
+                Portfolio
+              </a>
+            )}
+          </div>
+
+          {/* Previous Role and Hike % */}
+          <div className="flex justify-between items-center text-sm text-gray-700 mb-2">
             <div className="flex items-center gap-1">
               <Building2 className="w-4 h-4 text-gray-400" />
               <span>Previously {session.previous_role}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <GraduationCap className="w-4 h-4 text-gray-400" />
-              <span>{session.program_name}</span>
-            </div>
+            {session.hike_number !== null && session.previous_role !== 'Fresher' && (
+              <div className="flex items-center gap-1 text-green-600">
+                <TrendingUp className="w-4 h-4" />
+                <span className="font-semibold">{session.hike_number}% Hike</span>
+              </div>
+            )}
           </div>
 
+          {/* Program Name */}
+          <div className="flex items-center gap-1 text-sm text-gray-700 mb-4">
+            <GraduationCap className="w-4 h-4 text-gray-400" />
+            <span>{session.program_name}</span>
+          </div>
+
+          {/* Alumni History */}
           {session.alumni_history && (
             <div className="bg-gray-50 p-3 rounded mt-3">
               <p className="text-xs text-gray-500 mb-1">Alumni History</p>
