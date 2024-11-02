@@ -113,7 +113,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
         )}
 
         <div className="p-4">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start mb-2">
             <h2 className="text-lg font-bold text-gray-900">{session.alumni_name}</h2>
             <div className="flex flex-col items-end gap-1">
               <a
@@ -134,7 +134,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                   className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
                   onClick={handlePortfolioClick}
                 >
-                  <BookMarked className="w-4 h-4" /> {/* Updated icon */}
+                  <BookMarked className="w-4 h-4" />
                   Portfolio
                 </a>
               )}
@@ -147,7 +147,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             </div>
           </div>
 
-          <div className="space-y-1 mb-3 text-sm text-gray-700">
+          <div className="space-y-1 text-sm text-gray-700"> {/* Reduced margin */}
             <div className="flex items-center gap-1">
               <Briefcase className="w-4 h-4 text-gray-400" />
               <span>{session.current_role} at {session.current_company}</span>
@@ -163,7 +163,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           </div>
 
           {session.alumni_history && (
-            <div className="bg-gray-50 p-3 rounded mb-4">
+            <div className="bg-gray-50 p-3 rounded mt-3">
               <p className="text-xs text-gray-500 mb-1">Alumni History</p>
               <div
                 className="text-sm text-gray-900"
@@ -174,7 +174,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
 
           <button
             onClick={handleScheduleSessionClick}
-            className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 text-sm"
+            className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 text-sm mt-3"
           >
             Schedule a 1:1 Alumni Session
           </button>
