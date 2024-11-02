@@ -7,6 +7,7 @@ import {
   Linkedin,
   Download,
   TrendingUp,
+  BookMarked,
 } from 'lucide-react';
 import type { AlumniSession } from '../types';
 import { DirectusService } from '../services/directus';
@@ -36,22 +37,10 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     const downloadUrl = DirectusService.getAssetDownloadUrl(session.alumni_showcase);
     if (downloadUrl) {
       window.open(downloadUrl, '_blank');
-
-      // Track download button click
       trackEvent(`modal_${session.id}_download_image`, 'download_image');
-
-      // Show download message
       setShowDownloadMessage(true);
-      setTimeout(() => {
-        setShowDownloadMessage(false);
-      }, 2000); // Fade out after 2 seconds
-    } else {
-      console.error("Download URL is not available."); // Error handling if the URL is not available
+      setTimeout(() => setShowDownloadMessage(false), 2000);
     }
-  };
-
-  const handleImageLoad = () => {
-    setImageLoaded(true);
   };
 
   const handleLinkedInClick = (e: React.MouseEvent) => {
@@ -72,7 +61,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     );
   };
 
-  // Tracking function using gtag
   const trackEvent = (eventName: string, action: string) => {
     if (window.gtag) {
       window.gtag('event', action, {
@@ -93,15 +81,15 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           src={DirectusService.getAssetUrl(session.alumni_image)}
           alt={session.alumni_name}
           loading="lazy"
-          onLoad={handleImageLoad}
-          className={`w-full h-64 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
+          className={`w-full h-80 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
+          onLoad={() => setImageLoaded(true)}
         />
         
         {/* Button Container */}
         <div className="absolute right-4 top-4 flex gap-2 z-10">
           <button
             onClick={handleDownloadImage}
-            className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
+            className="p-1 rounded-full bg-white shadow hover:bg-gray-100 transition"
             title="Download image"
             aria-label="Download image"
           >
@@ -109,7 +97,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           </button>
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors"
+            className="p-1 rounded-full bg-white shadow hover:bg-gray-100 transition"
             title="Close modal"
             aria-label="Close modal"
           >
@@ -119,25 +107,23 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
 
         {/* Temporary download message */}
         {showDownloadMessage && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded-lg shadow-md z-60">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-3 rounded shadow-md">
             <p className="text-gray-800">Download Started</p>
           </div>
         )}
 
-        <div className="p-6">
+        <div className="p-4">
           <div className="flex justify-between items-start">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {session.alumni_name}
-            </h2>
-            <div className="flex flex-col items-end gap-2">
+            <h2 className="text-lg font-bold text-gray-900">{session.alumni_name}</h2>
+            <div className="flex flex-col items-end gap-1">
               <a
                 href={session.alumni_linkedin_profile}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
                 onClick={handleLinkedInClick}
               >
-                <Linkedin className="w-5 h-5" />
+                <Linkedin className="w-4 h-4" />
                 LinkedIn Profile
               </a>
               {session.alumni_portfolio && (
@@ -145,57 +131,50 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
                   href={session.alumni_portfolio}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
-                  onClick={handlePortfolioClick} // Track portfolio click
+                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+                  onClick={handlePortfolioClick}
                 >
-                  <Briefcase className="w-5 h-5" />
+                  <BookMarked className="w-4 h-4" /> {/* Updated icon */}
                   Portfolio
                 </a>
               )}
               {session.hike_number !== null && session.previous_role !== 'Fresher' && (
-                <div className="flex items-center gap-2 text-green-600">
-                  <TrendingUp className="w-5 h-5" />
+                <div className="flex items-center gap-1 text-green-600 text-sm">
+                  <TrendingUp className="w-4 h-4" />
                   <span className="font-semibold">{session.hike_number}% Hike</span>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center gap-2 text-gray-600">
-              <Briefcase className="w-5 h-5 text-gray-400" />
-              <span>
-                {session.current_role} at {session.current_company}
-              </span>
+          <div className="space-y-1 mb-3 text-sm text-gray-700">
+            <div className="flex items-center gap-1">
+              <Briefcase className="w-4 h-4 text-gray-400" />
+              <span>{session.current_role} at {session.current_company}</span>
             </div>
-
-            <div className="flex items-center gap-2 text-gray-600">
-              <Building2 className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center gap-1">
+              <Building2 className="w-4 h-4 text-gray-400" />
               <span>Previously {session.previous_role}</span>
             </div>
-
-            <div className="flex items-center gap-2 text-gray-600">
-              <GraduationCap className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center gap-1">
+              <GraduationCap className="w-4 h-4 text-gray-400" />
               <span>{session.program_name}</span>
             </div>
           </div>
 
-          {/* Show Alumni History only if it's not null */}
           {session.alumni_history && (
-            <div className="flex flex-col gap-4 mb-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 mb-2">Alumni History</p>
-                <div 
-                  className="prose prose-sm max-w-none text-gray-900"
-                  dangerouslySetInnerHTML={{ __html: session.alumni_history }}
-                />
-              </div>
+            <div className="bg-gray-50 p-3 rounded mb-4">
+              <p className="text-xs text-gray-500 mb-1">Alumni History</p>
+              <div
+                className="text-sm text-gray-900"
+                dangerouslySetInnerHTML={{ __html: session.alumni_history }}
+              />
             </div>
           )}
 
           <button
-            onClick={handleScheduleSessionClick} // Track schedule session click
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            onClick={handleScheduleSessionClick}
+            className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 text-sm"
           >
             Schedule a 1:1 Alumni Session
           </button>
