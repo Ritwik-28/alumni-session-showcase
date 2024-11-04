@@ -53,12 +53,32 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
     trackEvent(`modal_${session.id}_view_portfolio`, 'view_portfolio');
   };
 
+  const generatePrefillLink = () => {
+    // Determine the value for entry.1595370286 based on program_name
+    let programValue = 'Fellowship Program in Software Development';
+    if (session.program_name.includes('QA Automation') || session.program_name.includes('SDET')) {
+      programValue = 'Fellowship Program in QA Automation (SDET)';
+    } else if (session.program_name.includes('Backend') || session.program_name.includes('Fullstack')) {
+      programValue = 'Fellowship Program in Software Development';
+    }
+
+    // Prefill data for Google Form fields
+    const prefilledData = {
+      entry_1595370286: programValue, // Program name value
+      entry_49225849: session.alumni_name, // Alumni name
+    };
+
+    const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSfcFgyYj-Mbh9xyteoSIDmTcFpNtZI-LYIJW6k0rk1hk4AuXA/viewform?usp=pp_url';
+    const queryString = Object.entries(prefilledData)
+      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+      .join('&');
+    
+    return `${baseUrl}&${queryString}`;
+  };
+
   const handleScheduleSessionClick = () => {
-    trackEvent(`modal_${session.id}_schedule_session`, 'schedule_session');
-    window.open(
-      'https://docs.google.com/forms/d/e/1FAIpQLSfcFgyYj-Mbh9xyteoSIDmTcFpNtZI-LYIJW6k0rk1hk4AuXA/viewform',
-      '_blank'
-    );
+    const prefillLink = generatePrefillLink();
+    window.open(prefillLink, '_blank');
   };
 
   const trackEvent = (eventName: string, action: string) => {
@@ -83,7 +103,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           loading="lazy"
           className={`w-full max-w-full max-h-[40vh] sm:max-h-[50vh] md:max-h-[60vh] object-contain transition-opacity duration-500 ${
             imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'
-          }`} // Ensure image fits within modal without cutting
+          }`}
           onLoad={() => setImageLoaded(true)}
         />
         
