@@ -81,9 +81,9 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           src={DirectusService.getAssetUrl(session.alumni_image)}
           alt={session.alumni_name}
           loading="lazy"
-          className={`w-full object-cover transition-opacity duration-500 ${
+          className={`w-full max-w-full max-h-[40vh] sm:max-h-[50vh] md:max-h-[60vh] object-contain transition-opacity duration-500 ${
             imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'
-          } h-48 sm:h-64 md:h-72 lg:h-96`} // Responsive heights for different screen sizes
+          }`} // Ensure image fits within modal without cutting
           onLoad={() => setImageLoaded(true)}
         />
         
