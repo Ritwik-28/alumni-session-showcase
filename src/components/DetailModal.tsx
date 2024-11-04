@@ -81,7 +81,9 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           src={DirectusService.getAssetUrl(session.alumni_image)}
           alt={session.alumni_name}
           loading="lazy"
-          className={`w-full h-48 object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`} // Changed height to 48
+          className={`w-full object-cover transition-opacity duration-500 ${
+            imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'
+          } h-48 sm:h-64 md:h-72 lg:h-96`} // Responsive heights for different screen sizes
           onLoad={() => setImageLoaded(true)}
         />
         
