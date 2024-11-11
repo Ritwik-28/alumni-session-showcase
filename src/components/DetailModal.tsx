@@ -184,10 +184,17 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             )}
           </div>
 
-          {/* Program Name */}
-          <div className="flex items-center gap-1 text-sm text-gray-700 mb-4">
-            <GraduationCap className="w-4 h-4 text-gray-400" />
-            <span>{session.program_name}</span>
+          {/* Program Name and Alumni Placement */}
+          <div className="flex justify-between items-center gap-1 text-sm text-gray-700 mb-4">
+            <div className="flex items-center gap-1">
+              <GraduationCap className="w-4 h-4 text-gray-400" />
+              <span>{session.program_name}</span>
+            </div>
+            {session.alumni_placement && (
+              <span className="text-blue-600 font-semibold">
+                {session.alumni_placement}
+              </span>
+            )}
           </div>
 
           {/* Alumni History */}
