@@ -1,18 +1,17 @@
-// api/fetchSessions.js
 import fetch from 'node-fetch';
-import { fetchDirectusToken, getDirectusToken } from './authenticate.js';
+import { fetchDirectusToken } from './authenticate.js';
 
 const DIRECTUS_URL = process.env.VITE_DIRECTUS_URL;
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
-      let token = getDirectusToken();
-
-      // If there's no token, or if the token is expired, fetch a new one
-      if (!token) {
-        token = await fetchDirectusToken();
+      if (!DIRECTUS_URL) {
+        throw new Error('Missing VITE_DIRECTUS_URL environment variable');
       }
+
+      // Fetch a new token for each request
+      const token = await fetchDirectusToken();
 
       const response = await fetch(`${DIRECTUS_URL}/items/alumni_session?filter[status][_eq]=published&limit=-1`, {
         headers: {
@@ -22,15 +21,15 @@ export default async function handler(req, res) {
       });
 
       if (!response.ok) {
-        console.error(`Failed to fetch data from Directus: ${response.statusText}`);
-        return res.status(response.status).json({ error: 'Failed to fetch data from Directus' });
+        console.error(`Failed to fetch data from Directus: ${response.status} ${response.statusText}`);
+        return res.status(response.status).json({ error: `Failed to fetch data from Directus: ${response.statusText}` });
       }
 
       const data = await response.json();
       res.status(200).json(data);
     } catch (error) {
-      console.error('Error fetching sessions:', error);
-      res.status(500).json({ error: 'Failed to fetch sessions' });
+      console.error('Error fetching sessions:', error.message);
+      res.status(500).json({ error: `Failed to fetch sessions: ${error.message}` });
     }
   } else {
     res.setHeader('Allow', ['GET']);

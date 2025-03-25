@@ -1,15 +1,15 @@
-// api/authenticate.js
 import fetch from 'node-fetch';
 
 const DIRECTUS_URL = process.env.VITE_DIRECTUS_URL;
 const DIRECTUS_EMAIL = process.env.VITE_DIRECTUS_EMAIL;
 const DIRECTUS_PASSWORD = process.env.VITE_DIRECTUS_PASSWORD;
 
-let directusToken = null; // Variable to store the token
-
-// Function to fetch and set the token
 export async function fetchDirectusToken() {
   try {
+    if (!DIRECTUS_URL || !DIRECTUS_EMAIL || !DIRECTUS_PASSWORD) {
+      throw new Error('Missing required environment variables: VITE_DIRECTUS_URL, VITE_DIRECTUS_EMAIL, or VITE_DIRECTUS_PASSWORD');
+    }
+
     const response = await fetch(`${DIRECTUS_URL}/auth/login`, {
       method: 'POST',
       headers: {
@@ -22,34 +22,28 @@ export async function fetchDirectusToken() {
     });
 
     if (!response.ok) {
-      throw new Error('Authentication failed');
+      throw new Error(`Authentication failed: ${response.status} ${response.statusText}`);
     }
 
     const authData = await response.json();
-    directusToken = authData.data.access_token;
-    return directusToken;
+    return authData.data.access_token;
   } catch (error) {
-    console.error('Authentication error:', error);
-    throw new Error('Failed to authenticate');
+    console.error('Authentication error:', error.message);
+    throw new Error(`Failed to authenticate: ${error.message}`);
   }
 }
 
-// Endpoint to authenticate and retrieve a token (optional)
+// Optional endpoint to authenticate manually (if needed)
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const token = await fetchDirectusToken();
       res.status(200).json({ access_token: token });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to authenticate' });
+      res.status(500).json({ error: `Failed to authenticate: ${error.message}` });
     }
   } else {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-}
-
-// Export the token for use in other functions
-export function getDirectusToken() {
-  return directusToken;
 }
