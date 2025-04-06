@@ -11,33 +11,84 @@ import {
 } from 'lucide-react';
 import type { AlumniSession } from '../types';
 import { DirectusService } from '../services/directus';
+import posthog from 'posthog-js';
 
 interface DetailModalProps {
   session: AlumniSession;
   onClose: () => void;
+  filters: {
+    selectedCompany: string;
+    selectedProgram: string;
+    selectedTransition: string;
+  };
 }
 
-export function DetailModal({ session, onClose }: DetailModalProps) {
+export function DetailModal({ session, onClose, filters }: DetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showDownloadMessage, setShowDownloadMessage] = useState(false);
 
+  // Track scroll depth
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose(); // Close modal when clicking outside
-      }
-    }
+    const handleScroll = () => {
+      const container = modalRef.current;
+      if (!container) return;
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
+      const scrollY = container.scrollTop;
+      const maxScroll = container.scrollHeight - container.clientHeight;
+      const scrollPercent = Math.round((scrollY / maxScroll) * 100);
+
+      posthog.capture('modal_scroll', {
+        session_id: session.id,
+        name: session.alumni_name,
+        company: session.current_company,
+        program: session.program_name,
+        scroll_percent: scrollPercent,
+        filters,
+      });
+    };
+
+    const container = modalRef.current;
+    container?.addEventListener('scroll', handleScroll);
+
+    return () => {
+      container?.removeEventListener('scroll', handleScroll);
+    };
+  }, [session]);
+
+  // Track modal view time
+  useEffect(() => {
+    const startTime = Date.now();
+
+    return () => {
+      const durationMs = Date.now() - startTime;
+      posthog.capture('modal_view_duration', {
+        session_id: session.id,
+        name: session.alumni_name,
+        company: session.current_company,
+        program: session.program_name,
+        duration_seconds: Math.round(durationMs / 1000),
+        filters,
+      });
+    };
+  }, [session]);
+
+  const trackEvent = (eventName: string, extra: Record<string, any> = {}) => {
+    posthog.capture(eventName, {
+      session_id: session.id,
+      name: session.alumni_name,
+      company: session.current_company,
+      program: session.program_name,
+      filters,
+      ...extra,
+    });
+  };
 
   const handleDownloadImage = () => {
     const downloadUrl = DirectusService.getAssetDownloadUrl(session.alumni_showcase);
     if (downloadUrl) {
       window.open(downloadUrl, '_blank');
-      trackEvent(`modal_${session.id}_download_image`, 'download_image');
+      trackEvent('modal_image_downloaded');
       setShowDownloadMessage(true);
       setTimeout(() => setShowDownloadMessage(false), 2000);
     }
@@ -45,16 +96,15 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
 
   const handleLinkedInClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    trackEvent(`modal_${session.id}_view_linkedin`, 'view_linkedin');
+    trackEvent('linkedin_cta_clicked');
   };
 
   const handlePortfolioClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    trackEvent(`modal_${session.id}_view_portfolio`, 'view_portfolio');
+    trackEvent('portfolio_cta_clicked');
   };
 
   const generatePrefillLink = () => {
-    // Determine the value for entry.1595370286 based on program_name
     let programValue = 'Fellowship Program in Software Development';
     if (session.program_name.includes('QA Automation') || session.program_name.includes('SDET')) {
       programValue = 'Fellowship Program in QA Automation (SDET)';
@@ -62,33 +112,23 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
       programValue = 'Fellowship Program in Software Development';
     }
 
-    // Prefill data for Google Form fields
     const prefilledData = {
-      entry_1595370286: programValue, // Program name value
-      entry_49225849: session.alumni_name, // Alumni name
+      entry_1595370286: programValue,
+      entry_49225849: session.alumni_name,
     };
 
     const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSfcFgyYj-Mbh9xyteoSIDmTcFpNtZI-LYIJW6k0rk1hk4AuXA/viewform?usp=pp_url';
     const queryString = Object.entries(prefilledData)
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
       .join('&');
-    
+
     return `${baseUrl}&${queryString}`;
   };
 
   const handleScheduleSessionClick = () => {
+    trackEvent('schedule_cta_clicked');
     const prefillLink = generatePrefillLink();
     window.open(prefillLink, '_blank');
-  };
-
-  const trackEvent = (eventName: string, action: string) => {
-    if (window.gtag) {
-      window.gtag('event', action, {
-        event_category: 'Modal Interaction',
-        event_label: eventName,
-        value: session.id,
-      });
-    }
   };
 
   return (
@@ -106,8 +146,7 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           }`}
           onLoad={() => setImageLoaded(true)}
         />
-        
-        {/* Button Container */}
+
         <div className="absolute right-4 top-4 flex gap-2 z-10">
           <button
             onClick={handleDownloadImage}
@@ -127,7 +166,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           </button>
         </div>
 
-        {/* Temporary download message */}
         {showDownloadMessage && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-3 rounded shadow-md">
             <p className="text-gray-800">Download Started</p>
@@ -135,7 +173,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
         )}
 
         <div className="p-4">
-          {/* Alumni Name and LinkedIn CTA */}
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold text-gray-900">{session.alumni_name}</h2>
             <a
@@ -150,7 +187,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             </a>
           </div>
 
-          {/* Current Role/Company and Portfolio CTA */}
           <div className="flex justify-between items-center text-sm text-gray-700 mb-2">
             <div className="flex items-center gap-1">
               <Briefcase className="w-4 h-4 text-gray-400" />
@@ -170,7 +206,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             )}
           </div>
 
-          {/* Previous Role and Hike % */}
           <div className="flex justify-between items-center text-sm text-gray-700 mb-2">
             <div className="flex items-center gap-1">
               <Building2 className="w-4 h-4 text-gray-400" />
@@ -184,7 +219,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             )}
           </div>
 
-          {/* Program Name and Alumni Placement */}
           <div className="flex justify-between items-center gap-1 text-sm text-gray-700 mb-4">
             <div className="flex items-center gap-1">
               <GraduationCap className="w-4 h-4 text-gray-400" />
@@ -197,7 +231,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
             )}
           </div>
 
-          {/* Alumni History */}
           {session.alumni_history && (
             <div className="bg-gray-50 p-3 rounded mt-3">
               <p className="text-xs text-gray-500 mb-1">Alumni History</p>
@@ -209,7 +242,6 @@ export function DetailModal({ session, onClose }: DetailModalProps) {
           )}
         </div>
 
-        {/* Fixed CTA inside modal */}
         <div className="sticky bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 z-20">
           <button
             onClick={handleScheduleSessionClick}

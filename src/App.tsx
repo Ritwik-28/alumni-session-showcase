@@ -7,7 +7,7 @@ import { DetailModal } from './components/DetailModal';
 import { DirectusService } from './services/directus';
 import type { AlumniSession } from './types';
 
-// ✅ Expose PostHog to browser for manual testing
+// ✅ Expose PostHog to browser for testing
 // @ts-expect-error
 window.posthog = posthog;
 
@@ -72,6 +72,12 @@ export function App() {
     return matchesCompany && matchesProgram && matchesTransition;
   });
 
+  const filters = {
+    selectedCompany,
+    selectedProgram,
+    selectedTransition,
+  };
+
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStart.current = e.targetTouches[0].clientX;
     isTouching.current = true;
@@ -102,11 +108,15 @@ export function App() {
             );
           }
         } else {
-          setSelectedSession(filteredSessions[currentSlide]);
+          const session = filteredSessions[currentSlide];
+          setSelectedSession(session);
+
           posthog.capture('session_card_viewed', {
-            session_id: filteredSessions[currentSlide].id,
-            company: filteredSessions[currentSlide].current_company,
-            program: filteredSessions[currentSlide].program_name,
+            session_id: session.id,
+            name: session.alumni_name,
+            company: session.current_company,
+            program: session.program_name,
+            filters,
           });
         }
       }
@@ -116,10 +126,13 @@ export function App() {
 
   const handleSessionClick = (session: AlumniSession) => {
     setSelectedSession(session);
+
     posthog.capture('session_card_clicked', {
       session_id: session.id,
+      name: session.alumni_name,
       company: session.current_company,
       program: session.program_name,
+      filters,
     });
   };
 
@@ -170,6 +183,7 @@ export function App() {
                 <SessionCard
                   key={session.id}
                   session={session}
+                  filters={filters}
                   onClick={() => handleSessionClick(session)}
                 />
               ))}
@@ -187,7 +201,10 @@ export function App() {
                     <div className="w-full max-w-sm mx-auto px-4">
                       <SessionCard
                         session={filteredSessions[currentSlide]}
-                        onClick={() => handleSessionClick(filteredSessions[currentSlide])}
+                        filters={filters}
+                        onClick={() =>
+                          handleSessionClick(filteredSessions[currentSlide])
+                        }
                       />
                     </div>
                   </div>
@@ -221,6 +238,7 @@ export function App() {
           <DetailModal
             session={selectedSession}
             onClose={() => setSelectedSession(null)}
+            filters={filters}
           />
         )}
       </div>
