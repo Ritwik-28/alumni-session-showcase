@@ -7,7 +7,11 @@ import { DetailModal } from './components/DetailModal';
 import { DirectusService } from './services/directus';
 import type { AlumniSession } from './types';
 
-// Initialize PostHog
+// ✅ Expose PostHog to browser for manual testing
+// @ts-expect-error
+window.posthog = posthog;
+
+// ✅ Initialize PostHog
 posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY!, {
   api_host: `${window.location.origin}/ingest`,
   autocapture: true,
@@ -16,6 +20,11 @@ posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY!, {
     maskAllInputs: false,
   },
 });
+
+// ✅ Fallback log
+if (!import.meta.env.VITE_PUBLIC_POSTHOG_KEY) {
+  console.warn('❗ PostHog key not found in env!');
+}
 
 export function App() {
   const [sessions, setSessions] = useState<AlumniSession[]>([]);
@@ -94,7 +103,6 @@ export function App() {
           }
         } else {
           setSelectedSession(filteredSessions[currentSlide]);
-          // Track session view
           posthog.capture('session_card_viewed', {
             session_id: filteredSessions[currentSlide].id,
             company: filteredSessions[currentSlide].current_company,
@@ -108,8 +116,6 @@ export function App() {
 
   const handleSessionClick = (session: AlumniSession) => {
     setSelectedSession(session);
-
-    // 🔥 Track click event
     posthog.capture('session_card_clicked', {
       session_id: session.id,
       company: session.current_company,
