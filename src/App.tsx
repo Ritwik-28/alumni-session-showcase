@@ -1,10 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
+import posthog from 'posthog-js'; // PostHog import
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Filters } from './components/Filters';
 import { SessionCard } from './components/SessionCard';
 import { DetailModal } from './components/DetailModal';
 import { DirectusService } from './services/directus';
 import type { AlumniSession } from './types';
+
+// Initialize PostHog
+posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY!, {
+  api_host: `${window.location.origin}/ingest`,
+  autocapture: true,
+  capture_pageview: true,
+  session_recording: {
+    // recordCanvas: true, // Removed as it is not a valid property
+    maskAllInputs: false,
+  },
+});
 
 export function App() {
   const [sessions, setSessions] = useState<AlumniSession[]>([]);
@@ -13,7 +25,7 @@ export function App() {
   const [selectedSession, setSelectedSession] = useState<AlumniSession | null>(null);
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('');
-  const [selectedTransition, setSelectedTransition] = useState(''); // New state for transition filter
+  const [selectedTransition, setSelectedTransition] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
   const touchStart = useRef(0);
   const touchEnd = useRef(0);
@@ -39,11 +51,11 @@ export function App() {
 
   useEffect(() => {
     setCurrentSlide(0);
-  }, [selectedCompany, selectedProgram, selectedTransition]); // Reset slide on filter change
+  }, [selectedCompany, selectedProgram, selectedTransition]);
 
   const companies = [...new Set(sessions.map((s) => s.current_company))].sort();
   const programs = [...new Set(sessions.map((s) => s.program_name))].sort();
-  const transitions = [...new Set(sessions.map((s) => s.alumni_transition).filter((item): item is string => item !== undefined))].sort(); // Unique transitions without undefined
+  const transitions = [...new Set(sessions.map((s) => s.alumni_transition).filter((item): item is string => item !== undefined))].sort();
 
   const filteredSessions = sessions.filter((session) => {
     const matchesCompany = !selectedCompany || session.current_company === selectedCompany;
@@ -83,10 +95,27 @@ export function App() {
           }
         } else {
           setSelectedSession(filteredSessions[currentSlide]);
+          // Track session view
+          posthog.capture('session_card_viewed', {
+            session_id: filteredSessions[currentSlide].id,
+            company: filteredSessions[currentSlide].current_company,
+            program: filteredSessions[currentSlide].program_name,
+          });
         }
       }
       isTouching.current = false;
     }, 100);
+  };
+
+  const handleSessionClick = (session: AlumniSession) => {
+    setSelectedSession(session);
+
+    // 🔥 Track click event
+    posthog.capture('session_card_clicked', {
+      session_id: session.id,
+      company: session.current_company,
+      program: session.program_name,
+    });
   };
 
   if (error) {
@@ -115,14 +144,14 @@ export function App() {
         <Filters
           companies={companies}
           programs={programs}
-          transitions={transitions} // Pass transitions
+          transitions={transitions}
           selectedCompany={selectedCompany}
           selectedProgram={selectedProgram}
-          selectedTransition={selectedTransition} // Pass selected transition
+          selectedTransition={selectedTransition}
           sessions={sessions}
           onCompanyChange={setSelectedCompany}
           onProgramChange={setSelectedProgram}
-          onTransitionChange={setSelectedTransition} // Pass transition change handler
+          onTransitionChange={setSelectedTransition}
         />
 
         {loading ? (
@@ -136,7 +165,7 @@ export function App() {
                 <SessionCard
                   key={session.id}
                   session={session}
-                  onClick={() => setSelectedSession(session)}
+                  onClick={() => handleSessionClick(session)}
                 />
               ))}
             </div>
@@ -153,23 +182,19 @@ export function App() {
                     <div className="w-full max-w-sm mx-auto px-4">
                       <SessionCard
                         session={filteredSessions[currentSlide]}
-                        onClick={() => setSelectedSession(filteredSessions[currentSlide])}
+                        onClick={() => handleSessionClick(filteredSessions[currentSlide])}
                       />
                     </div>
                   </div>
 
                   <div className="flex justify-center gap-2 mt-4">
-                    {[0, 1, 2, 3, 4].map((index) => (
+                    {[...Array(filteredSessions.length).keys()].map((index) => (
                       <button
                         key={index}
                         className={`h-2 rounded-full transition-all ${
                           currentSlide === index ? 'w-4 bg-blue-600' : 'w-2 bg-gray-300'
                         }`}
-                        onClick={() => {
-                          if (index < filteredSessions.length) {
-                            setCurrentSlide(index);
-                          }
-                        }}
+                        onClick={() => setCurrentSlide(index)}
                       />
                     ))}
                   </div>
