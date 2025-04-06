@@ -13,7 +13,6 @@ posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY!, {
   autocapture: true,
   capture_pageview: true,
   session_recording: {
-    // recordCanvas: true, // Removed as it is not a valid property
     maskAllInputs: false,
   },
 });
