@@ -23,12 +23,16 @@ interface DetailModalProps {
   };
 }
 
+// ✅ Slugify helper for clean event names
+const slugify = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+
 export function DetailModal({ session, onClose, filters }: DetailModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showDownloadMessage, setShowDownloadMessage] = useState(false);
 
-  // Track scroll depth
+  // 🔁 Scroll depth tracking
   useEffect(() => {
     const handleScroll = () => {
       const container = modalRef.current;
@@ -38,7 +42,7 @@ export function DetailModal({ session, onClose, filters }: DetailModalProps) {
       const maxScroll = container.scrollHeight - container.clientHeight;
       const scrollPercent = Math.round((scrollY / maxScroll) * 100);
 
-      posthog.capture('modal_scroll', {
+      posthog.capture(`modal_scroll_${slugify(session.alumni_name)}`, {
         session_id: session.id,
         name: session.alumni_name,
         company: session.current_company,
@@ -50,19 +54,15 @@ export function DetailModal({ session, onClose, filters }: DetailModalProps) {
 
     const container = modalRef.current;
     container?.addEventListener('scroll', handleScroll);
-
-    return () => {
-      container?.removeEventListener('scroll', handleScroll);
-    };
+    return () => container?.removeEventListener('scroll', handleScroll);
   }, [session]);
 
-  // Track modal view time
+  // ⏱ View time tracking
   useEffect(() => {
     const startTime = Date.now();
-
     return () => {
       const durationMs = Date.now() - startTime;
-      posthog.capture('modal_view_duration', {
+      posthog.capture(`modal_view_duration_${slugify(session.alumni_name)}`, {
         session_id: session.id,
         name: session.alumni_name,
         company: session.current_company,
@@ -74,7 +74,7 @@ export function DetailModal({ session, onClose, filters }: DetailModalProps) {
   }, [session]);
 
   const trackEvent = (eventName: string, extra: Record<string, any> = {}) => {
-    posthog.capture(eventName, {
+    posthog.capture(`${eventName}_${slugify(session.alumni_name)}`, {
       session_id: session.id,
       name: session.alumni_name,
       company: session.current_company,

@@ -13,9 +13,13 @@ interface SessionCardProps {
   };
 }
 
+// ✅ Helper to slugify the alumni name for cleaner event names
+const slugify = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+
 export function SessionCard({ session, onClick, filters }: SessionCardProps) {
   const handleCardClick = () => {
-    posthog.capture('session_card_clicked', {
+    posthog.capture(`session_card_clicked_${slugify(session.alumni_name)}`, {
       session_id: session.id,
       name: session.alumni_name,
       company: session.current_company,

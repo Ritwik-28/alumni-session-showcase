@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import posthog from 'posthog-js'; // PostHog import
+import posthog from 'posthog-js';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Filters } from './components/Filters';
 import { SessionCard } from './components/SessionCard';
@@ -11,7 +11,6 @@ import type { AlumniSession } from './types';
 // @ts-expect-error
 window.posthog = posthog;
 
-// ✅ Initialize PostHog
 posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY!, {
   api_host: `${window.location.origin}/ingest`,
   autocapture: true,
@@ -21,10 +20,13 @@ posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY!, {
   },
 });
 
-// ✅ Fallback log
 if (!import.meta.env.VITE_PUBLIC_POSTHOG_KEY) {
   console.warn('❗ PostHog key not found in env!');
 }
+
+// ✅ Slugify helper to format names for events
+const slugify = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
 
 export function App() {
   const [sessions, setSessions] = useState<AlumniSession[]>([]);
@@ -111,7 +113,7 @@ export function App() {
           const session = filteredSessions[currentSlide];
           setSelectedSession(session);
 
-          posthog.capture('session_card_viewed', {
+          posthog.capture(`session_card_viewed_${slugify(session.alumni_name)}`, {
             session_id: session.id,
             name: session.alumni_name,
             company: session.current_company,
@@ -127,7 +129,7 @@ export function App() {
   const handleSessionClick = (session: AlumniSession) => {
     setSelectedSession(session);
 
-    posthog.capture('session_card_clicked', {
+    posthog.capture(`session_card_clicked_${slugify(session.alumni_name)}`, {
       session_id: session.id,
       name: session.alumni_name,
       company: session.current_company,
