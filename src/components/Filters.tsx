@@ -97,7 +97,7 @@ export function Filters({
             onChange={(e) => onTransitionChange(e.target.value)}
             className="appearance-none bg-white border border-gray-200 rounded-lg px-4 py-2 pr-8 w-full sm:w-48 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Transitions</option>
+            <option value="">View All Transitions</option>
             {availableTransitions.map((transition) => (
               <option key={transition} value={transition}>
                 {transition}
